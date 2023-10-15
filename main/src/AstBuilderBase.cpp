@@ -4,9 +4,6 @@
 
 using namespace antlr4;
 
-static std::jmp_buf run_stop;
-static std::jmp_buf tree_stop;
-
 void print_token(Token* token) {
     std::string s = token->getText();
     fprintf(stderr, "#%s#\n", s.c_str());
@@ -32,64 +29,24 @@ AstBuilderBase::~AstBuilderBase()
 
 }
 
-volatile void *x;
-void AstBuilderBase::run(Swift5Parser::Top_levelContext* ctx)
+void AstBuilderBase::pushNode(void *node)
 {
-    if(setjmp(run_stop) != 0)
-    {
-        doRun();
-        return;
-    }
-
-    {
-        // reverse stack space for the run path
-        x = __builtin_alloca(4096<<3);
-        (void)x;
-
-        visit(ctx);
-    }
+    stack.push(node);
 }
 
-void AstBuilderBase::doRun()
+void AstBuilderBase::popNode()
 {
-    while(true)
-    {
-        if(node_queue.size())
-        {
-            auto* ctx = node_queue.front();
-            node_queue.pop();
-            newln();
-            newln();
-            print("node:");
-            newln();
-            print_text(ctx);
-        }
-        else
-        {
-            treeCont();
-        }
-    }
+    stack.pop();
 }
 
-void AstBuilderBase::treeCont()
+void *AstBuilderBase::topNode()
 {
-    if(setjmp(run_stop) != 1)
-        longjmp(tree_stop, 1);
+    return stack.top();
 }
 
-void AstBuilderBase::runCont()
+uint32_t AstBuilderBase::getState(antlr4::ParserRuleContext* ctx)
 {
-    if(setjmp(tree_stop) != 1)
-        longjmp(run_stop, 1);
-}
-
-void AstBuilderBase::pushNode(antlr4::ParserRuleContext* ctx)
-{
-    node_queue.push(ctx);
-    if(node_queue.size() > 4)
-    {
-        runCont();
-    }
+    return ctx->invokingState != -1 ? ctx->invokingState : 0xFFFFFFFE;
 }
 
 void AstBuilderBase::blockBegin()
@@ -101,7 +58,7 @@ void AstBuilderBase::blockBegin()
 
 void AstBuilderBase::blockEnd()
 {
-    dev_indent();
+    dec_indent();
     newln();
     print("}");
 }

@@ -24,6 +24,7 @@ add_custom_target(dist_files SOURCES
                 build_antlr4.sh
                 README.md
                 LICENSE.txt
+                main/src/libs/Swift5States.txt
 )
 
 add_executable(swift_pretty

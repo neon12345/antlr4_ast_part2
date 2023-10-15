@@ -27,6 +27,8 @@ int main(int argc, char** argv) {
 
     AstBuilder visitor;
 
-    visitor.run(root);
+    AstBuilder::Top_level* top = std::any_cast<AstBuilder::Top_level*>(visitor.visit(root));
+    top->print();
+    delete top;
     return 0;
 }

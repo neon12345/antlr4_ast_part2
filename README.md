@@ -8,11 +8,10 @@ The swift5 grammar for the Swift language is used as a starting point to develop
 
 ## How it works  
 
-This project is a visitor program for the target language with the generated files from the first project.
+This project is a visitor program for the target language with the generated files from the first project (AstBuilder.h and AstBuilder.cpp).
 
 The first project is a visitor program using the antlr4 grammar for grammars (ANTLRv4Parser.g4). A conversion algorithm identifies main rules for AST node classes and propagates the needed data fields from the children. It then generates visitor files for the target grammar to create an AST form source files of the target language.  
    
-  
 ## Usage
   
 Call the program with the one arguments: target_file.swift
